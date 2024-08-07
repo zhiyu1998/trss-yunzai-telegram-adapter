@@ -1,8 +1,16 @@
+<div align="center">
+
+<a href="https://gitee.com/kyrzy0416/rconsole-plugin">
+    <img width="200" src="./logo.webp">
+</a>
+
 # trss-yunzai-telegram-adapter
 
 `trss-yunzai-telegram-adapter` 适配器采用了 [格莱美 - grammY](https://github.com/grammyjs/grammY)，更灵活的中间件替换原本比较朴素无华的 [node-telegram-bot-api](https://github.com/yagop/node-telegram-bot-api)
 
 ⚠️ 适用范围：[Trss-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai)
+
+</div>
 
 ## 安装教程
 
