@@ -29,7 +29,7 @@
 
 > 比如：#TG设置7125519xxx:xxxxxxx.....
 
-删除适配器，在`TRSS-Yunzai`目录下输入以下命令：
+⚠️ 删除适配器，在`TRSS-Yunzai`目录下输入以下命令：
 > rm -rf ./plugins/adapter/Telegram.js
 
 ## 使用教程
