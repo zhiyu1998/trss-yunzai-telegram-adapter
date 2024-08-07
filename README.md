@@ -17,7 +17,7 @@
 1. 准备：[TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai)
 
 2. 【第一次 / 更新】输入：在`TRSS-Yunzai`目录下输入以下命令
-> curl -fsSL https://gitee.com/kyrzy0416/trss-yunzai-telegram-adapter/raw/master/index.js > plugins/adapter/Telegram.js
+   > curl -fsSL https://gitee.com/kyrzy0416/trss-yunzai-telegram-adapter/raw/master/index.js > plugins/adapter/Telegram.js
 
 3. 打开：[BotFather](https://t.me/BotFather) 创建 Bot：  
 
@@ -27,7 +27,7 @@
 
 4. 输入：`#TG设置Token`
 
-   - > 比如：#TG设置7125519xxx:xxxxxxx.....
+   > 比如：#TG设置7125519xxx:xxxxxxx.....
    
 
 
