@@ -1,37 +1,26 @@
 # trss-yunzai-telegram-adapter
 
-#### 介绍
-基于 grammY 的 TRSS-Yunzai Telegram Bot 适配器【 社区版 】
+`trss-yunzai-telegram-adapter` 适配器采用了 [格莱美 - grammY](https://github.com/grammyjs/grammY)，更灵活的中间件替换原本比较朴素无华的 [node-telegram-bot-api](https://github.com/yagop/node-telegram-bot-api)
 
-#### 软件架构
-软件架构说明
+⚠️ 适用范围：[Trss-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai)
 
+## 安装教程
 
-#### 安装教程
+1. 准备：[TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai)
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+2. 【第一次 / 更新】输入：在`TRSS-Yunzai`目录下输入以下命令
+> curl -fsSL https://gitee.com/kyrzy0416/trss-yunzai-telegram-adapter/raw/master/index.js > plugins/adapter/Telegram.js
 
-#### 使用说明
+3. 打开：[BotFather](https://t.me/BotFather) 创建 Bot：  
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+   - /newbot  
 
-#### 参与贡献
+   - /mybots → API Token → 得到 `Token`
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+4. 输入：`#TG设置Token`
 
+## 使用教程
 
-#### 特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+- #TG账号
+- #TG设置 + `Token`
+- #TG代理/反代 + `scheme://[userinfo@]host[:port]`

@@ -1,0 +1,8 @@
+{
+  "name": "trss-yunzai-telegram-adapter",
+  "type": "module",
+  "author": "zhiyu1998",
+  "dependencies": {
+    "grammy": "^1.28.0"
+  }
+}
