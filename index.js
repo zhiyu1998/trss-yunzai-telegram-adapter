@@ -17,7 +17,7 @@ const { config, configSave } = await makeConfig("Telegram", {
 }, {
     tips: [
         "欢迎使用 trss-yunzai-telegram-plugin ! 作者：zhiyu1998",
-        "参考：https://gitee.com/kyrzy0416/trss-yunzai-telegram-plugin",
+        "参考：https://gitee.com/kyrzy0416/trss-yunzai-telegram-adapter",
     ],
 })
 
