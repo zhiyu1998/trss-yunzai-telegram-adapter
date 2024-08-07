@@ -27,7 +27,10 @@
 
 4. 输入：`#TG设置Token`
 
-> 比如：#TG设置7125519xxx:xxxxxxx.....
+   ```
+   > 比如：#TG设置7125519xxx:xxxxxxx.....
+   ```
+
 
 ⚠️ 删除适配器，在`TRSS-Yunzai`目录下输入以下命令：
 > rm -rf ./plugins/adapter/Telegram.js
