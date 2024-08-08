@@ -38,6 +38,10 @@ async function constructFileType(data) {
     }
     if (Buffer.isBuffer(file.buffer)) {
         file.type = await fileTypeFromBuffer(file.buffer);
+        const timestamp = Date.now().toString(36);
+        const randomString = Math.random().toString(36).substring(2, 10);
+        const extension = file.type.ext; // 假设 file.type.ext 是文件的扩展名
+        file.name ??= `${ timestamp }.${ randomString }.${ extension }`;
     }
     return file;
 }
@@ -118,8 +122,8 @@ const adapter = new class TelegramAdapter {
                 Bot.makeLog("info", `发送图片：${formatSendMessage(ctx, file)}`, ctx.self_id);
                 const size = imageSize(file.buffer);
                 const sendFunc = size.height > 1280 || size.width > 1280
-                    ? () => ctx.bot.api.sendDocument(ctx.id, new InputFile(file.buffer), opts)
-                    : () => ctx.bot.api.sendPhoto(ctx.id, new InputFile(file.buffer), opts);
+                    ? () => ctx.bot.api.sendDocument(ctx.id, new InputFile(file.buffer, file.name), opts)
+                    : () => ctx.bot.api.sendPhoto(ctx.id, new InputFile(file.buffer, file.name), opts);
                 await sendMedia(file, sendFunc);
             },
             "record": async (i) => {
@@ -133,9 +137,9 @@ const adapter = new class TelegramAdapter {
 
                 Bot.makeLog("info", `发送音频：${formatSendMessage(ctx, file)}`, ctx.self_id);
                 const audioFuncs = {
-                    "mp3": () => ctx.bot.api.sendAudio(ctx.id, new InputFile(file.buffer), opts),
-                    "m4a": () => ctx.bot.api.sendAudio(ctx.id, new InputFile(file.buffer), opts),
-                    "opus": () => ctx.bot.api.sendVoice(ctx.id, new InputFile(file.buffer), opts),
+                    "mp3": () => ctx.bot.api.sendAudio(ctx.id, new InputFile(file.buffer, file.name), opts),
+                    "m4a": () => ctx.bot.api.sendAudio(ctx.id, new InputFile(file.buffer, file.name), opts),
+                    "opus": () => ctx.bot.api.sendVoice(ctx.id, new InputFile(file.buffer, file.name), opts),
                 };
                 const sendFunc = audioFuncs[file.type.ext] || (() => ctx.bot.api.sendDocument(ctx.id, new InputFile(file.buffer, file.name), opts));
                 await sendMedia(file, sendFunc);
@@ -150,7 +154,7 @@ const adapter = new class TelegramAdapter {
                 }
 
                 Bot.makeLog("info", `发送视频：${formatSendMessage(ctx, file)}`, ctx.self_id);
-                await sendMedia(file, () => ctx.bot.api.sendVideo(ctx.id, new InputFile(file.buffer), opts));
+                await sendMedia(file, () => ctx.bot.api.sendVideo(ctx.id, new InputFile(file.buffer, file.name), opts));
             },
             "file": async (i) => {
                 await sendText();
@@ -374,7 +378,9 @@ const adapter = new class TelegramAdapter {
 
         Bot.makeLog("mark", `${ this.name }(${ this.id }) - [${ Bot[id].nickname }] - ${ this.version } 已连接`, id)
         Bot.em(`connect.${ id }`, { self_id: id })
-        await grammyBot.start();
+        // 这里不要加 await 防止进程阻塞
+        grammyBot.start();
+        return true;
     }
 
     async load() {
@@ -423,6 +429,7 @@ export class Telegram extends plugin {
             this.reply(`账号已删除，重启后生效，共${ config.token.length }个账号`, true)
         } else {
             if (await adapter.connect(token)) {
+
                 config.token.push(token)
                 this.reply(`账号已连接，共${ config.token.length }个账号`, true)
             } else {
