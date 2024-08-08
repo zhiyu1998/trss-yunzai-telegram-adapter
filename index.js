@@ -1,5 +1,5 @@
 import makeConfig from "../../lib/plugins/config.js"
-import { Bot as GrammyBot, InputFile } from "grammy";
+import { Bot as GrammyBot, InputFile,  } from "grammy";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import imageSize from "image-size";
 import { fileTypeFromBuffer } from "file-type";
@@ -53,9 +53,21 @@ async function constructFileType(data) {
  * @returns {string}
  */
 function formatSendMessage(ctx, fileInfo) {
-    return `[${ ctx.id }] (${ fileInfo.url } ${ (fileInfo.buffer.length / 1024).toFixed(2) }KB)`;
+    return `[${ ctx.id }] ${ fileInfo.name }(${ fileInfo.url } ${ (fileInfo.buffer.length / 1024).toFixed(2) }KB)`;
 }
 
+/**
+ * 构造普通的消息
+ * @param i
+ * @returns {{text, type: string}}
+ */
+function constructTextMsg(i) {
+    if (typeof i !== "object") {
+        return { type: "text", text: i };
+    }
+}
+
+// 适配器
 const adapter = new class TelegramAdapter {
     constructor() {
         this.id = "Telegram"
@@ -63,11 +75,14 @@ const adapter = new class TelegramAdapter {
         this.version = `grammy v1.28.0`
     }
 
+    /**
+     * 发送消息
+     * @param ctx
+     * @param msg
+     * @param opts
+     * @returns {Promise<{data: *[], message_id: *[]}>}
+     */
     async sendMsg(ctx, msg, opts = {}) {
-        if (!Array.isArray(msg)) {
-            msg = [msg];
-        }
-
         const msgs = [];
         const message_id = [];
         let textParts = [];
@@ -188,19 +203,95 @@ const adapter = new class TelegramAdapter {
             }
         };
 
-        for (let i of msg) {
-            if (typeof i !== "object") {
-                i = { type: "text", text: i };
+        /**
+         * 发送处理
+         * @returns {Promise<void>}
+         */
+        const sendHandler = async (messages) => {
+            // 构造一文一图的情况，如果出现两张都是图片则给予后续逻辑处理
+            if (Array.isArray(messages) &&　messages?.type !== 'node') {
+                // 找出媒体和文字
+                const mediaAndOthers = messages.reduce(
+                    (acc, item) => {
+                        if (typeof item === "object") {
+                            acc.media.push(item);
+                        } else {
+                            acc.others += item;
+                        }
+                        return acc;
+                    },
+                    { media: [], others: '' }
+                );
+                // 判断是否有媒体，没有就发送文字，有就图文并茂
+                if (mediaAndOthers.media.length === 1) {
+                    const singleMedia = mediaAndOthers.media[0];
+                    // 单个媒体和文字
+                    const file = await constructFileType(singleMedia);
+                    await ctx.bot.api.sendPhoto(ctx.id, new InputFile(file.buffer, file.name), { caption: mediaAndOthers.others });
+                } else if (mediaAndOthers.media.length >= 2) {
+                    // 出现多个媒体和文字
+                    const mediaCollection = [];
+                    // 这里比较复杂，需要将第一个media加入caption，其余正常处理成Group即可
+                    for (let i = 0; i < mediaAndOthers.media.length; i++) {
+                        const file = await constructFileType(mediaAndOthers.media[i]);
+                        const constructMedia = { type: 'photo', media: new InputFile(file.buffer, file.name)}
+                        if (i === 0) {
+                            constructMedia.caption = mediaAndOthers.others; // 仅在第一个文件中添加 caption
+                        }
+                        mediaCollection.push(constructMedia);
+                    }
+                    await ctx.bot.api.sendMediaGroup(ctx.id, mediaCollection);
+                } else {
+                    // 没有媒体和文字
+                    await ctx.bot.api.sendMessage(ctx.id, mediaAndOthers.others);
+                }
+                return;
+            } else if (Array.isArray(messages?.data) &&　messages?.type === 'node') {
+                const messagesData = messages.data;
+                // 过滤图片和视频合并发送
+                const others = [];
+                const mediaCollection = [];
+                // 这里是构造 mediaCollection
+                for (const item of messagesData) {
+                    const singleMessage = item.message;
+                    if (singleMessage.type === "image") {
+                        const file = await constructFileType(singleMessage);
+                        mediaCollection.push({ type: 'photo', media: new InputFile(file.buffer, file.name)});
+                    } else if (singleMessage.type === "video") {
+                        const file = await constructFileType(singleMessage);
+                        mediaCollection.push({ type: 'video', media: new InputFile(file.buffer, file.name)});
+                    } else {
+                        others.push(item);
+                    }
+                }
+                // 不是媒体的信息先发送
+                for (let i of others) {
+                    const handler = handlers[i.type] || handlers["default"];
+                    await handler(i);
+                }
+
+                // logger.info(mediaCollection);
+                await ctx.bot.api.sendMediaGroup(ctx.id, mediaCollection);
+                return;
             }
-            const handler = handlers[i.type] || handlers["default"];
-            await handler(i);
-        }
+            // 其他情况直接发送（理论上是单个消息处理）
+            const handler = handlers[messages.type] || handlers["default"];
+            await handler(messages);
+        };
+        // 发送处理
+        await sendHandler(msg);
 
         await sendText();
         return { data: msgs, message_id };
     }
 
-
+    /**
+     * 撤回消息
+     * @param data
+     * @param message_id
+     * @param opts
+     * @returns {Promise<*[]>}
+     */
     async recallMsg(data, message_id, opts) {
         Bot.makeLog("info", `撤回消息：[${ data.id }] ${ message_id }`, data.self_id)
         if (!Array.isArray(message_id))
@@ -211,6 +302,11 @@ const adapter = new class TelegramAdapter {
         return msgs
     }
 
+    /**
+     * 获取机器人头像
+     * @param ctx
+     * @returns {Promise<boolean|string>}
+     */
     async getAvatarUrl(ctx) {
         try {
             // 获取机器人自身的信息
@@ -227,6 +323,12 @@ const adapter = new class TelegramAdapter {
         }
     }
 
+    /**
+     * 获取好友信息
+     * @param id
+     * @param user_id
+     * @returns {{getAvatarUrl: (function(): Promise<boolean|string>), recallMsg: (function(*, *): Promise<*[]>), getInfo: (function(): Promise<import("@grammyjs/types/manage.js").ChatFullInfo>), bot: *, self_id: *, id: *, sendMsg: (function(*, *): Promise<{data: *[], message_id: *[]}>)}}
+     */
     pickFriend(id, user_id) {
         if (typeof user_id !== "string")
             user_id = String(user_id)
@@ -245,6 +347,13 @@ const adapter = new class TelegramAdapter {
         }
     }
 
+    /**
+     * 获取成员信息
+     * @param id
+     * @param group_id
+     * @param user_id
+     * @returns {*&{getInfo: (function(): Promise<import("@grammyjs/types/manage.js").ChatMember>), group_id: *, user_id: *, bot: *, self_id: *}}
+     */
     pickMember(id, group_id, user_id) {
         if (typeof group_id !== "string")
             group_id = String(group_id)
@@ -264,6 +373,12 @@ const adapter = new class TelegramAdapter {
         }
     }
 
+    /**
+     * 获取群信息
+     * @param id
+     * @param group_id
+     * @returns {{getAvatarUrl: (function(): Promise<boolean|string>), pickMember: (function(*): *), recallMsg: (function(*, *): Promise<*[]>), getInfo: (function(): Promise<import("@grammyjs/types/manage.js").ChatFullInfo>), bot: *, self_id: *, id: *, sendMsg: (function(*, *): Promise<{data: *[], message_id: *[]}>)}}
+     */
     pickGroup(id, group_id) {
         if (typeof group_id !== "string")
             group_id = String(group_id)
