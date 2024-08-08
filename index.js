@@ -40,7 +40,7 @@ async function constructFileType(data) {
         file.type = await fileTypeFromBuffer(file.buffer);
         const timestamp = Date.now().toString(36);
         const randomString = Math.random().toString(36).substring(2, 10);
-        const extension = file.type.ext; // 假设 file.type.ext 是文件的扩展名
+        const extension = file.type?.ext; // 假设 file.type.ext 是文件的扩展名
         file.name ??= `${ timestamp }.${ randomString }.${ extension }`;
     }
     return file;
@@ -208,6 +208,7 @@ const adapter = new class TelegramAdapter {
          * @returns {Promise<void>}
          */
         const sendHandler = async (messages) => {
+            logger.info(messages);
             // 构造一文一图的情况，如果出现两张都是图片则给予后续逻辑处理
             if (Array.isArray(messages) &&　messages?.type !== 'node') {
                 // 找出媒体和文字
@@ -223,7 +224,7 @@ const adapter = new class TelegramAdapter {
                     { media: [], others: '' }
                 );
                 // 判断是否有媒体，没有就发送文字，有就图文并茂
-                if (mediaAndOthers.media.length === 1) {
+                if (mediaAndOthers.media.length === 1 && mediaAndOthers.media[0].type !== 'at') {
                     const singleMedia = mediaAndOthers.media[0];
                     // 单个媒体和文字
                     const file = await constructFileType(singleMedia);

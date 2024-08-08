@@ -1,7 +1,7 @@
 <div align="center">
 
 <a href="https://gitee.com/kyrzy0416/rconsole-plugin">
-    <img width="200" src="./logo.webp">
+    <img width="200" src="images/logo.webp">
 </a>
 
 # trss-yunzai-telegram-adapter
@@ -39,3 +39,23 @@
 - #TG账号
 - #TG设置 + `Token`
 - #TG代理/反代 + `scheme://[userinfo@]host[:port]`
+
+## 效果
+
+### 文字发送
+
+![text.webp](./images/text.webp)
+
+### 语音发送
+
+![audio.webp](./images/audio.webp)
+
+### 图片发送
+
+![photo.webp](./images/photo2.webp)
+
+![photo.webp](./images/photo.webp)
+
+### 视频发送
+
+![video.webp](./images/video.webp)
