@@ -12,7 +12,7 @@
 
 </div>
 
-## 安装教程
+## 📋 安装教程
 
 1. 准备：[TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai)
 
@@ -34,13 +34,13 @@
 ⚠️ 删除适配器，在`TRSS-Yunzai`目录下输入以下命令：
 > rm -rf ./plugins/adapter/Telegram.js
 
-## 使用教程
+## 🎓 使用教程
 
 - #TG账号
 - #TG设置 + `Token`
 - #TG代理/反代 + `scheme://[userinfo@]host[:port]`
 
-## 效果
+## 🪧 效果
 
 ### 文字发送
 
