@@ -276,6 +276,7 @@ const adapter = new class TelegramAdapter {
                 return;
             }
             // 其他情况直接发送（理论上是单个消息处理）
+            typeof messages !== 'object' && (messages = { type: 'text', text: messages });
             const handler = handlers[messages.type] || handlers["default"];
             await handler(messages);
         };
