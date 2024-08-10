@@ -128,7 +128,6 @@ const adapter = new class TelegramAdapter {
          */
         const handlers = {
             "text": async (i) => {
-                logger.info(5555555555555555555555);
                 textParts.push(i.text);
             },
             "image": async (i) => {
