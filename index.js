@@ -1,8 +1,8 @@
 import makeConfig from "../../lib/plugins/config.js"
 import { Bot as GrammyBot, InputFile,  } from "grammy";
 import { HttpsProxyAgent } from "https-proxy-agent";
-import imageSize from "image-size";
 import { fileTypeFromBuffer } from "file-type";
+import imageSize from "image-size";
 
 process.env.NTBA_FIX_350 = 1
 
@@ -50,10 +50,15 @@ async function constructFileType(data) {
  * 格式化发送信息
  * @param ctx
  * @param fileInfo
+ * @param text
  * @returns {string}
  */
-function formatSendMessage(ctx, fileInfo) {
-    return `[${ ctx.id }] ${ fileInfo.name }(${ fileInfo.url } ${ (fileInfo.buffer.length / 1024).toFixed(2) }KB)`;
+function formatSendMessage(ctx, fileInfo = {} || [], text = "") {
+    if (Array.isArray(fileInfo)) {
+        return `[${ ctx.id }] ${text} ${fileInfo.length} 个媒体文件`;
+    } else {
+        return `[${ ctx.id }] ${text} ${ fileInfo.name }(${ fileInfo.url } ${ (fileInfo.buffer.length / 1024).toFixed(2) }KB)`;
+    }
 }
 
 /**
@@ -228,7 +233,10 @@ const adapter = new class TelegramAdapter {
                     const singleMedia = mediaAndOthers.media[0];
                     // 单个媒体和文字
                     const file = await constructFileType(singleMedia);
+                    // 发送图文
                     await ctx.bot.api.sendPhoto(ctx.id, new InputFile(file.buffer, file.name), { caption: mediaAndOthers.others });
+                    // 打印日志
+                    Bot.makeLog("info", `发送媒体组：${formatSendMessage(ctx, file, mediaAndOthers.others)}`, ctx.self_id);
                 } else if (mediaAndOthers.media.length >= 2) {
                     // 出现多个媒体和文字
                     const mediaCollection = [];
@@ -242,9 +250,12 @@ const adapter = new class TelegramAdapter {
                         mediaCollection.push(constructMedia);
                     }
                     await ctx.bot.api.sendMediaGroup(ctx.id, mediaCollection);
+                    // 打印日志 TODO
+                    Bot.makeLog("info", `发送媒体组：${formatSendMessage(ctx, mediaAndOthers.media, mediaAndOthers.others)}`, ctx.self_id);
                 } else {
                     // 没有媒体和文字
                     await ctx.bot.api.sendMessage(ctx.id, mediaAndOthers.others);
+                    Bot.makeLog("info", `发送文本：${mediaAndOthers.others}`, ctx.self_id);
                 }
                 return;
             } else if (Array.isArray(messages?.data) &&　messages?.type === 'node') {
@@ -273,6 +284,8 @@ const adapter = new class TelegramAdapter {
 
                 // logger.info(mediaCollection);
                 await ctx.bot.api.sendMediaGroup(ctx.id, mediaCollection);
+                // 打印日志 TODO
+                Bot.makeLog("info", `发送媒体组：${formatSendMessage(ctx, mediaCollection)}`, ctx.self_id);
                 return;
             }
             // 其他情况直接发送（理论上是单个消息处理）
