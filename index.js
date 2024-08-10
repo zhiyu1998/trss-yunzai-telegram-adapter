@@ -61,17 +61,6 @@ function formatSendMessage(ctx, fileInfo = {} || [], text = "") {
     }
 }
 
-/**
- * 构造普通的消息
- * @param i
- * @returns {{text, type: string}}
- */
-function constructTextMsg(i) {
-    if (typeof i !== "object") {
-        return { type: "text", text: i };
-    }
-}
-
 // 适配器
 const adapter = new class TelegramAdapter {
     constructor() {
@@ -261,7 +250,7 @@ const adapter = new class TelegramAdapter {
                 const messagesData = messages.data;
                 // 过滤图片和视频合并发送
                 const others = [];
-                const mediaCollection = [];
+                let mediaCollection = [];
                 // 这里是构造 mediaCollection
                 for (const item of messagesData) {
                     const singleMessage = item.message;
@@ -280,8 +269,16 @@ const adapter = new class TelegramAdapter {
                     const handler = handlers[i.type] || handlers["default"];
                     await handler(i);
                 }
-
-                mediaCollection.length > 0 && (await ctx.bot.api.sendMediaGroup(ctx.id, mediaCollection));
+                // 使用批处理避开 TG API 限制，经过测试限制为10张
+                if (mediaCollection.length > 10) {
+                    for (let i = 0; i < mediaCollection.length; i += 10) {
+                        const batch = mediaCollection.slice(i, i + 10);
+                        await ctx.bot.api.sendMediaGroup(ctx.id, batch);
+                    }
+                } else {
+                    // 发送媒体
+                    mediaCollection.length > 0 && (await ctx.bot.api.sendMediaGroup(ctx.id, mediaCollection));
+                }
                 // 打印日志
                 Bot.makeLog("info", `发送媒体组：${formatSendMessage(ctx, mediaCollection)}`, ctx.self_id);
                 return;
