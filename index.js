@@ -213,7 +213,6 @@ const adapter = new class TelegramAdapter {
          * @returns {Promise<void>}
          */
         const sendHandler = async (messages) => {
-            logger.info(messages);
             // 构造一文一图的情况，如果出现两张都是图片则给予后续逻辑处理
             if (Array.isArray(messages) &&　messages?.type !== 'node') {
                 // 找出媒体和文字
