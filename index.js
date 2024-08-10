@@ -128,6 +128,7 @@ const adapter = new class TelegramAdapter {
          */
         const handlers = {
             "text": async (i) => {
+                logger.info(5555555555555555555555);
                 textParts.push(i.text);
             },
             "image": async (i) => {
@@ -250,7 +251,7 @@ const adapter = new class TelegramAdapter {
                         mediaCollection.push(constructMedia);
                     }
                     await ctx.bot.api.sendMediaGroup(ctx.id, mediaCollection);
-                    // 打印日志 TODO
+                    // 打印日志
                     Bot.makeLog("info", `发送媒体组：${formatSendMessage(ctx, mediaAndOthers.media, mediaAndOthers.others)}`, ctx.self_id);
                 } else {
                     // 没有媒体和文字
@@ -273,7 +274,7 @@ const adapter = new class TelegramAdapter {
                         const file = await constructFileType(singleMessage);
                         mediaCollection.push({ type: 'video', media: new InputFile(file.buffer, file.name)});
                     } else {
-                        others.push(item);
+                        others.push(item.message);
                     }
                 }
                 // 不是媒体的信息先发送
@@ -282,9 +283,8 @@ const adapter = new class TelegramAdapter {
                     await handler(i);
                 }
 
-                // logger.info(mediaCollection);
-                await ctx.bot.api.sendMediaGroup(ctx.id, mediaCollection);
-                // 打印日志 TODO
+                mediaCollection.length > 0 && (await ctx.bot.api.sendMediaGroup(ctx.id, mediaCollection));
+                // 打印日志
                 Bot.makeLog("info", `发送媒体组：${formatSendMessage(ctx, mediaCollection)}`, ctx.self_id);
                 return;
             }
