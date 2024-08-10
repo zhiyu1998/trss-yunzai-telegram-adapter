@@ -16,9 +16,10 @@
 
 1. 准备：[TRSS-Yunzai](https://gitee.com/TimeRainStarSky/Yunzai)
 
-2. 【第一次 / 更新】输入：在`TRSS-Yunzai`目录下输入以下命令
+2. 【第一次 / 更新】：在`TRSS-Yunzai`目录下输入以下命令
    > curl -fsSL https://gitee.com/kyrzy0416/trss-yunzai-telegram-adapter/raw/master/index.js > plugins/adapter/Telegram.js
-
+   > // 安装依赖
+   > pnpm install grammy -w
 3. 打开：[BotFather](https://t.me/BotFather) 创建 Bot：  
 
    - /newbot  
@@ -29,8 +30,6 @@
 
    > 比如：#TG设置7125519xxx:xxxxxxx.....
    
-
-
 ⚠️ 删除适配器，在`TRSS-Yunzai`目录下输入以下命令：
 > rm -rf ./plugins/adapter/Telegram.js
 
