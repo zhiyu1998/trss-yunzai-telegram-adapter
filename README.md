@@ -18,6 +18,7 @@
 
 2. 【第一次 / 更新】：在`TRSS-Yunzai`目录下输入以下命令
    > curl -fsSL https://gitee.com/kyrzy0416/trss-yunzai-telegram-adapter/raw/master/index.js > plugins/adapter/Telegram.js  
+
    > // 安装依赖  
    > pnpm install grammy -w
 3. 打开：[BotFather](https://t.me/BotFather) 创建 Bot：  
