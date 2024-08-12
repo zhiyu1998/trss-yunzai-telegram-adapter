@@ -41,7 +41,7 @@
 - #TG设置 + `Token`
 - #TG代理/反代 + `scheme://[userinfo@]host[:port]`
 
-## 问题
+## 🐛 问题
 
 ### 📦 关于大文件发送
 
